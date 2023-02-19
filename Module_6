@@ -1,0 +1,16 @@
+# Reading data
+read <- 'Customers.csv'
+data <- read.csv(read, stringsAsFactors = FALSE, na.strings=c("",".","NA"))
+
+# Loading ggplot2
+library(ggplot2)
+
+# Cleaning data
+colnames(data) <- c("CustomerID", "Gender", "Age", "AnnualIncome", "SpendingScore", "Profession", "WorkExperience", "FamilySize")
+data <- na.omit(data)
+
+# Visualization 
+ggplot(data, aes(x = Profession, y = SpendingScore, width = .5)) + 
+  geom_bar(stat = "summary", position = "dodge", na.rm = TRUE, aes(fill = Gender)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(title = "Spending Scores by Gender and Profession", x = "Profession", y = "Spending Score")
