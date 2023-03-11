@@ -1,0 +1,11 @@
+# Libraries
+library(grid)
+library(ggplot2)
+
+# Data visualization
+ggplot(mtcars, aes(x = mpg, y = hp)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "MPG and Horsepower", x = "MPG", y = "Horsepower") +
+  theme_classic() +
+  theme(panel.grid.major = element_line(color = "black", linetype = "dotted"))
