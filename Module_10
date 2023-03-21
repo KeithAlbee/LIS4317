@@ -1,0 +1,16 @@
+library(readr)
+library(ggplot2)
+MilitarySpending <- read_csv("MilitarySpending.csv")
+
+plot1 <- qplot(Year, DefenseBudget, data = MilitarySpending, geom = "line") +
+  labs(x = "Year", y = "USD Defense Budget (in Billions)", title = "U.S. Defense Budget (1960-2020)")
+
+plot1
+
+colors <- ifelse(MilitarySpending$DefenseBudget > 400, "Red", "Yellow")
+
+plot2 <- ggplot(MilitarySpending) +
+  geom_col(aes(x = Year, y = DefenseBudget, col = colors)) +
+  labs(x = "Year", y = "USD Defense Budget (in Billions)", title = "U.S. Defense Budget (1960-2020)")
+
+plot2
