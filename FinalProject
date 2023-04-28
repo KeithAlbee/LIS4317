@@ -1,0 +1,118 @@
+#### Preliminary Work ####
+library(dplyr)
+library(readr)
+library(ggplot2)
+
+# Loading the data
+setwd("C:/Users/albee/Downloads/archive(1)")
+df <- read_csv("diabetes_012_health_indicators_BRFSS2015.csv")
+
+# Subsetting rows to manageable size
+dfSub <- df[sample(nrow(df), size=10000), ]
+
+# Removing the hyphens
+dfSub$Diabetes_012 <- gsub("-", "", dfSub$Diabetes_012)
+dfSub$HighBP <- gsub("-", "", dfSub$HighBP)
+dfSub$HighChol <- gsub("-", "", dfSub$HighChol)
+dfSub$BMI <- gsub("-", "", dfSub$BMI)
+dfSub$HeartDiseaseorAttack <- gsub("-", "", dfSub$HeartDiseaseorAttack)
+dfSub$PhysActivity <- gsub("-", "", dfSub$PhysActivity)
+dfSub$Age <- gsub("-", "", dfSub$Age)
+dfSub$HvyAlcoholConsump <- gsub("-", "", dfSub$HvyAlcoholConsump)
+
+
+# Subsetting data to the relevant columns
+diabetes <- subset(dfSub, select = c(Diabetes_012, HighChol, HighBP, BMI,
+                                  HeartDiseaseorAttack, PhysActivity, Age, HvyAlcoholConsump))
+# Renaming remaining columns
+colnames(diabetes) <- c("Diabetes", "HighChol", "HighBP", "BMI", "HeartDisease", "PhysActivity", "AgeGroup", "Alcohol")
+
+# Changing columns to numeric
+diabetes <- diabetes %>% mutate_if(is.character, as.numeric)
+
+# Updating binary to yes/no
+diabetes$Diabetes <- gsub("1", "Pre", diabetes$Diabetes)
+diabetes$Diabetes <- gsub("0", "No", diabetes$Diabetes)
+diabetes$Diabetes <- gsub("2", "Yes", diabetes$Diabetes)
+
+diabetes$HighChol <- gsub("1", "Yes", diabetes$HighChol)
+diabetes$HighChol <- gsub("0", "No", diabetes$HighChol)
+
+
+diabetes$HighBP <- gsub("1", "Yes", diabetes$HighBP)
+diabetes$HighBP <- gsub("0", "No", diabetes$HighBP)
+
+diabetes$HeartDisease <- gsub("1", "Yes", diabetes$HeartDisease)
+diabetes$HeartDisease <- gsub("0", "No", diabetes$HeartDisease)
+
+diabetes$PhysActivity <- gsub("1", "Yes", diabetes$PhysActivity)
+diabetes$PhysActivity <- gsub("0", "No", diabetes$PhysActivity)
+
+diabetes$Alcohol <- gsub("1", "Yes", diabetes$Alcohol)
+diabetes$Alcohol <- gsub("0", "No", diabetes$Alcohol)
+
+
+#### Viz 1: Age and Diabetes ####
+# Subsetting people with diabetes
+only_diabetes <- subset(diabetes, Diabetes != "No" & Diabetes != "Pre")
+# Creating Viz
+ggplot(only_diabetes, aes(x = AgeGroup)) +
+  geom_bar(stat = "count", fill = "#322D5B", color = "Black") +
+  labs(title = "Diabetes Count by Age Group", x = "Age Group", y = "Diabetes Count") +
+  theme(plot.background = element_rect(fill = "White"),
+        plot.title = element_text(hjust = 0.5, size = 18),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15))
+
+#### Viz 2: BMI Boxplot #####
+# Creating viz
+ggplot(only_diabetes, aes(x = BMI)) +
+  geom_boxplot(fill = "#322D5B", color = "Black") +
+  labs(title = "BMI of People with Diabetes", x = "Body Mass Index") +
+  theme(plot.background = element_rect(fill = "White"),
+        plot.title = element_text(hjust = 0.5, size = 18),
+        axis.text.x = element_text(size = 12),
+        axis.title.x = element_text(size = 15))
+
+#### Viz 3: Dual Pie Charts for Exercising! ####
+# Subsetting people without (for comparison)
+no_diabetes <- subset(diabetes, Diabetes != "Yes" & Diabetes != "Pre")
+# Creating viz
+ggplot(no_diabetes, aes(x = "PhysActivity", y = Diabetes, fill = PhysActivity)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5, size = 18),
+        axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 15)) +
+  scale_fill_manual(values=c("#84819C", "#322D5B")) +
+  labs(title = "Ratio of People without Diabetes that Exercise")
+
+ggplot(only_diabetes, aes(x = "PhysActivity", y = Diabetes, fill = PhysActivity)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5, size = 18),
+        axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 15)) +
+  scale_fill_manual(values=c("#84819C", "#322D5B")) +
+  labs(title = "Ratio of People with Diabetes that Exercise)")
+
+#### Viz 4: Bonus! Bar chart comparing heart disease ####
+combined_diabetes <- subset(diabetes, Diabetes != "Pre")
+ggplot(combined_diabetes, aes(x = HeartDisease, fill = Diabetes)) +
+  geom_bar(position = "dodge", stat = "count", color = "Black") +
+  scale_fill_manual(values= c("#84819C", "#322D5B")) + 
+  labs(title = "Heart Disease and Diabetes", x = "Heart Disease")
